@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Beam — Pricing & ROI Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f6f5f1;
@@ -28,7 +28,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 14px;
     line-height: 1.6;
     min-height: 100vh;
@@ -49,11 +49,23 @@
   }
 
   .logo {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .logo-bar {
+    color: var(--accent);
+    font-weight: 300;
+    margin: 0 6px 0 8px;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.7;
   }
 
   .logo span { color: var(--accent); }
@@ -109,8 +121,9 @@
   .card-title {
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
   .card-body { padding: 20px; }
@@ -156,7 +169,7 @@
     display: block;
     font-size: 9px;
     color: var(--text-dim);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     margin-top: 1px;
     font-weight: 400;
   }
@@ -521,12 +534,60 @@
     .results-panel { position: static; }
     .header { padding: 16px 20px; }
   }
+
+  /* PDF EXPORT */
+  .pdf-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: opacity 0.15s;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .pdf-btn:hover { opacity: 0.85; }
+  .pdf-btn svg { flex-shrink: 0; }
+
+  /* PDF PRINT TEMPLATE */
+  #pdfTemplate {
+    display: none;
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    width: 794px;
+    background: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #2b2b2b;
+  }
+
+  @media print {
+    body > *:not(#pdfTemplate) { display: none !important; }
+    #pdfTemplate {
+      display: block !important;
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+    }
+    @page { margin: 0; size: A4; }
+  }
+
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">BEAM<span>.</span></div>
+  <div class="logo">beam<span class="logo-bar">|</span></div>
   <div class="header-tag">Pricing & ROI Calculator — v1.0</div>
 </div>
 
@@ -884,8 +945,30 @@
       </div>
     </div>
 
+    <!-- PDF EXPORT -->
+    <div class="result-card">
+      <div class="result-header">Export</div>
+      <div class="result-body">
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.6;">
+          Generates a 1-page PDF summary with your selected tech stack, cost estimate, and ROI analysis. Ready to attach to a proposal.
+        </div>
+        <button class="pdf-btn" onclick="generatePDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download PDF Summary
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- PDF TEMPLATE -->
+<div id="pdfTemplate"></div>
+
 
 <script>
 // ───────────── STATE ─────────────
@@ -992,8 +1075,8 @@ const crmData = {
 
 const sttData = {
   chimege: {
-    note: 'Mongolian-native STT. ~₮15 per call (≈$0.004 at current rates). Assumes ~60s average voice note. Best for Mongolian-language reps.',
-    costPerCall: 0.004
+    note: 'Mongolian-native STT. Priced at ₮3,000/hour = ₮50/min. A 60s voice note ≈ ₮50 (~$0.014). Best accuracy for Mongolian-language reps.',
+    costPerCall: 0.014
   },
   whisper: {
     note: 'OpenAI Whisper API: $0.006/min. 60s note = $0.006. Strong multilingual, handles accents well.',
@@ -1183,7 +1266,7 @@ function recalc() {
       <div class="breakdown-row"><span>Monthly STT cost</span><span class="bv">${fmt(sttMonthly)}</span></div>
       <div class="breakdown-row"><span>Voice notes/month</span><span class="bv">${(state.voicePerDay * state.reps * workDays).toLocaleString()}</span></div>
       <div class="breakdown-row"><span>Cost per call</span><span class="bv">$${sttData[state.stt].costPerCall.toFixed(4)}</span></div>
-      ${state.stt === 'chimege' ? `<div class="note-box" style="margin-top:8px">Chimege pricing: ₮15/call ≈ $${(15/fx).toFixed(4)} USD. Rough estimate — confirm seconds billing with Chimege directly.</div>` : ''}
+      ${state.stt === 'chimege' ? `<div class="note-box" style="margin-top:8px">Chimege pricing: ₮3,000/hr = ₮50/min. A 60s note ≈ ₮50 = $0.014 USD. Source: Chimege STT-Long API.</div>` : ''}
     </div>` : ''}
     <div class="breakdown-section">
       <div class="breakdown-section-title">CRM · ${state.crm}</div>
@@ -1224,6 +1307,208 @@ function updateEl(id, html) {
 
 // Init
 recalc();
+
+
+// ───────────── PDF EXPORT ─────────────
+function generatePDF() {
+  const s = state;
+  const inp = inputData[s.input];
+  const ai = aiData[s.ai];
+  const crm = crmData[s.crm];
+  const stt = s.voice ? sttData[s.stt] : null;
+  const workDays = 22;
+  const fx = 3450;
+  const isLocal = s.region === 'local';
+  const totalUsers = s.reps + s.admins;
+
+  // Recalculate values
+  const aiMonthly = ai.costPerLog * s.reps * s.logs * workDays;
+  const sttMonthly = s.voice ? stt.costPerCall * s.voicePerDay * s.reps * workDays : 0;
+  const crmMonthly = s.crmEnterprise ? 0 : (crm.free ? 0 : crm.perSeat * totalUsers);
+  const n8nMonthly = s.reps <= 5 ? 0 : (s.reps <= 20 ? 20 : 50);
+  const inputMonthly = inp.monthlyCost;
+  const totalMonthly = aiMonthly + sttMonthly + crmMonthly + n8nMonthly + inputMonthly;
+
+  const setupFees = { intl: { small: 2500, mid: 5000, large: 12000 }, local: { small: 1250, mid: 2500, large: 6000 } };
+  const retainerFees = { intl: { small: 500, mid: 1200, large: 3000 }, local: { small: 250, mid: 600, large: 1500 } };
+  const setupFee = setupFees[s.region][s.size];
+  const retainerFee = retainerFees[s.region][s.size];
+
+  const minPerMonth = s.timeSaved * s.logs * workDays;
+  const hoursSaved = minPerMonth / 60;
+  const laborSaved = hoursSaved * s.reps * s.salary;
+  const revenueSaved = s.reps * s.deals * s.dealValue * (s.missRate/100) * (s.recoverRate/100);
+  const totalValueSaved = s.roiMode === 'labor' ? laborSaved : s.roiMode === 'revenue' ? revenueSaved : laborSaved + revenueSaved;
+  const roiRatio = totalMonthly > 0 ? (totalValueSaved / totalMonthly) : 99;
+  const paybackMonths = setupFee / Math.max(totalValueSaved - totalMonthly, 1);
+
+  const fmt = v => '$' + (+v).toFixed(0);
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const sizeLabel = { small: 'Small (1–20 employees)', mid: 'Mid-Market (20–200 employees)', large: 'Enterprise (200+)' }[s.size];
+  const regionLabel = s.region === 'local' ? 'Mongolia' : 'International';
+  const roiModeLabel = { labor: 'Labor Savings', revenue: 'Revenue at Stake', both: 'Combined' }[s.roiMode];
+
+  const stackRows = [
+    ['Input Channel', s.input.charAt(0).toUpperCase() + s.input.slice(1), inp.monthlyCost === 0 ? 'Free' : fmt(inp.monthlyCost) + '/mo'],
+    ['AI Model', { claude: 'Claude (Anthropic)', gpt4o: 'GPT-4o (OpenAI)', copilot: 'Copilot (Microsoft)', gemini: 'Gemini (Google)' }[s.ai], fmt(aiMonthly) + '/mo'],
+    ['CRM', s.crm.charAt(0).toUpperCase() + s.crm.slice(1), s.crmEnterprise ? 'Enterprise (included)' : (crmMonthly === 0 ? 'Free' : fmt(crmMonthly) + '/mo')],
+    ['Automation', 'n8n', n8nMonthly === 0 ? 'Free' : fmt(n8nMonthly) + '/mo'],
+  ];
+  if (s.voice) stackRows.push(['Voice STT', { chimege: 'Chimege', whisper: 'Whisper (OpenAI)', google: 'Google STT' }[s.stt], fmt(sttMonthly) + '/mo']);
+
+  const html = `
+  <div style="padding: 56px 60px; font-family: 'Plus Jakarta Sans', sans-serif; color: #2b2b2b; font-size: 13px; line-height: 1.6; max-width: 794px;">
+
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; padding-bottom:24px; border-bottom:2px solid #1f3d2b;">
+      <div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:26px; font-weight:500; color:#2b2b2b; letter-spacing:-0.02em;">
+          beam <span style="color:#1f3d2b; font-weight:300; margin:0 2px;">|</span>
+        </div>
+        <div style="font-size:11px; color:#7a7670; margin-top:4px; letter-spacing:0.08em; text-transform:uppercase;">AI Sales Automation</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:16px; font-weight:600; color:#2b2b2b;">Proposal Summary</div>
+        <div style="font-size:11px; color:#7a7670; margin-top:4px;">${today}</div>
+        <div style="font-size:11px; color:#7a7670;">${regionLabel} · ${sizeLabel}</div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px;">
+
+      <!-- TECH STACK -->
+      <div>
+        <div style="font-size:10px; font-weight:700; color:#1f3d2b; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px;">Tech Stack</div>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <tr style="background:#f6f5f1;">
+            <th style="padding:7px 10px; text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:#7a7670; border-bottom:1px solid #dedad2;">Component</th>
+            <th style="padding:7px 10px; text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:#7a7670; border-bottom:1px solid #dedad2;">Choice</th>
+            <th style="padding:7px 10px; text-align:right; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:#7a7670; border-bottom:1px solid #dedad2;">Cost</th>
+          </tr>
+          ${stackRows.map((r,i) => `
+          <tr style="background:${i%2===0?'#fff':'#faf9f7'};">
+            <td style="padding:8px 10px; color:#7a7670; border-bottom:1px solid #f0ede7;">${r[0]}</td>
+            <td style="padding:8px 10px; font-weight:500; border-bottom:1px solid #f0ede7;">${r[1]}</td>
+            <td style="padding:8px 10px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11px; border-bottom:1px solid #f0ede7;">${r[2]}</td>
+          </tr>`).join('')}
+        </table>
+
+        <div style="margin-top:20px;">
+          <div style="font-size:10px; font-weight:700; color:#1f3d2b; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">Team Setup</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            ${[
+              ['Sales Reps', s.reps + ' users'],
+              ['Admin Seats', s.admins + ' users'],
+              ['Region', regionLabel],
+              ['Voice Input', s.voice ? 'Enabled' : 'Text only'],
+            ].map(r => `<div style="background:#f6f5f1; padding:10px 12px; border-radius:3px;">
+              <div style="font-size:10px; color:#7a7670; margin-bottom:2px;">${r[0]}</div>
+              <div style="font-weight:600; font-size:13px;">${r[1]}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- COST + ROI -->
+      <div>
+        <div style="font-size:10px; font-weight:700; color:#1f3d2b; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px;">Cost Estimate</div>
+
+        <div style="background:#f6f5f1; border-radius:4px; padding:16px 18px; margin-bottom:16px;">
+          <div style="font-size:11px; color:#7a7670; margin-bottom:4px;">Monthly Running Cost</div>
+          <div style="font-size:32px; font-weight:700; color:#2b2b2b; line-height:1; font-family:'IBM Plex Mono',monospace;">${fmt(totalMonthly)}</div>
+          <div style="font-size:11px; color:#7a7670; margin-top:4px;">/ month · ${totalUsers} total users</div>
+        </div>
+
+        <div style="font-size:12px;">
+          ${[
+            ['AI Model', fmt(aiMonthly)],
+            s.voice ? ['Voice STT', fmt(sttMonthly)] : null,
+            ['CRM', crmMonthly === 0 ? 'Included' : fmt(crmMonthly)],
+            ['Automation (n8n)', n8nMonthly === 0 ? 'Free' : fmt(n8nMonthly)],
+            ['Input Channel', inputMonthly === 0 ? 'Free' : fmt(inputMonthly)],
+          ].filter(Boolean).map(r => `
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0ede7;">
+            <span style="color:#7a7670;">${r[0]}</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-weight:500;">${r[1]}</span>
+          </div>`).join('')}
+          <div style="display:flex; justify-content:space-between; padding:10px 0; margin-top:4px;">
+            <span style="color:#7a7670; font-size:11px;">One-time setup fee</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-weight:600;">${fmt(setupFee)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span style="color:#7a7670; font-size:11px;">Monthly retainer (optional)</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:#1f3d2b;">${fmt(retainerFee)}/mo</span>
+          </div>
+        </div>
+
+        <!-- ROI -->
+        <div style="margin-top:20px;">
+          <div style="font-size:10px; font-weight:700; color:#1f3d2b; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">ROI Analysis · ${roiModeLabel}</div>
+
+          <div style="background:#1f3d2b; border-radius:4px; padding:16px 18px; color:#fff; margin-bottom:12px;">
+            <div style="font-size:10px; opacity:0.7; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.08em;">Monthly Value Saved</div>
+            <div style="font-size:28px; font-weight:700; line-height:1; font-family:'IBM Plex Mono',monospace;">${fmt(totalValueSaved)}</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+            ${[
+              ['ROI Ratio', roiRatio.toFixed(1) + '×'],
+              ['Payback', paybackMonths.toFixed(1) + ' mo'],
+              ['Hrs saved/rep', hoursSaved.toFixed(1) + ' hrs'],
+            ].map(r => `<div style="background:#f6f5f1; padding:10px 12px; border-radius:3px; text-align:center;">
+              <div style="font-size:10px; color:#7a7670; margin-bottom:3px;">${r[0]}</div>
+              <div style="font-weight:700; font-size:15px; font-family:'IBM Plex Mono',monospace;">${r[1]}</div>
+            </div>`).join('')}
+          </div>
+          ${s.roiMode !== 'labor' ? `
+          <div style="margin-top:10px; padding:10px 12px; background:#fff8f5; border:1px solid #f0d8cc; border-radius:3px; font-size:11px; color:#7a7670;">
+            <strong style="color:#c46a4a;">Revenue at stake:</strong> ${s.reps} reps × ${s.deals} deals/mo × $${(+s.dealValue).toLocaleString()} avg × ${s.missRate}% miss rate × ${s.recoverRate}% recovery = <strong>${fmt(revenueSaved)}/mo protected</strong>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="border-top:1px solid #dedad2; padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:11px; color:#b8b4ac;">Generated by Beam Calculator · beam | AI Sales Automation</div>
+      <div style="font-size:11px; color:#b8b4ac; font-style:italic;">Estimates based on configured assumptions. Subject to change.</div>
+    </div>
+
+  </div>`;
+
+  // Load fonts then print
+  const template = document.getElementById('pdfTemplate');
+  template.innerHTML = html;
+
+  // Use html2canvas + jsPDF approach via window.print with print styles
+  const printWindow = window.open('', '_blank', 'width=900,height=700');
+  printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Beam Proposal — ${today}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>${html}</body>
+</html>`);
+  printWindow.document.close();
+  // Wait for fonts then trigger print
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+  }, 800);
+}
+
 </script>
 </body>
 </html>
