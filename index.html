@@ -738,24 +738,69 @@
         <span class="card-title">ROI Assumptions</span>
       </div>
       <div class="card-body">
-        <div class="slider-row">
-          <span class="slider-label">Avg. hourly salary</span>
-          <input type="range" id="salarySlider" min="3" max="60" value="8" oninput="updateSlider('salary',this.value)">
-          <span class="slider-val" id="salaryVal">$8</span>
+
+        <div class="section-label">ROI Mode</div>
+        <div class="pill-group">
+          <div class="pill active" data-group="roiMode" data-val="labor" onclick="pickOption(this,'roiMode')">
+            Labor Savings
+            <span class="pill-note">Time saved x hourly rate</span>
+          </div>
+          <div class="pill" data-group="roiMode" data-val="revenue" onclick="pickOption(this,'roiMode')">
+            Revenue at Stake
+            <span class="pill-note">Missed deals prevented</span>
+          </div>
+          <div class="pill" data-group="roiMode" data-val="both" onclick="pickOption(this,'roiMode')">
+            Combined
+            <span class="pill-note">Labor + revenue</span>
+          </div>
         </div>
-        <div class="slider-row">
-          <span class="slider-label">Logs per rep / day</span>
-          <input type="range" id="logsSlider" min="2" max="20" value="6" oninput="updateSlider('logs',this.value)">
-          <span class="slider-val" id="logsVal">6</span>
+
+        <div id="laborInputs" style="margin-top:16px">
+          <div class="section-label">Labor Savings Inputs</div>
+          <div class="slider-row">
+            <span class="slider-label">Avg. hourly salary</span>
+            <input type="range" id="salarySlider" min="3" max="60" value="9" oninput="updateSlider('salary',this.value)">
+            <span class="slider-val" id="salaryVal">$9</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">Logs per rep / day</span>
+            <input type="range" id="logsSlider" min="2" max="20" value="6" oninput="updateSlider('logs',this.value)">
+            <span class="slider-val" id="logsVal">6</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">Min saved per log</span>
+            <input type="range" id="timeSavedSlider" min="2" max="30" value="8" oninput="updateSlider('timeSaved',this.value)">
+            <span class="slider-val" id="timeSavedVal">8 min</span>
+          </div>
         </div>
-        <div class="slider-row">
-          <span class="slider-label">Min saved per log</span>
-          <input type="range" id="timeSavedSlider" min="2" max="30" value="8" oninput="updateSlider('timeSaved',this.value)">
-          <span class="slider-val" id="timeSavedVal">8 min</span>
+
+        <div id="revenueInputs" style="margin-top:16px; display:none">
+          <div class="section-label">Revenue at Stake Inputs</div>
+          <div class="slider-row">
+            <span class="slider-label">Avg. deal value</span>
+            <input type="range" id="dealValueSlider" min="500" max="500000" step="500" value="50000" oninput="updateSlider('dealValue',this.value)">
+            <span class="slider-val" id="dealValueVal">$50k</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">Deals / rep / month</span>
+            <input type="range" id="dealsSlider" min="1" max="30" value="8" oninput="updateSlider('deals',this.value)">
+            <span class="slider-val" id="dealsVal">8</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">% lost to no follow-up</span>
+            <input type="range" id="missRateSlider" min="1" max="30" value="5" oninput="updateSlider('missRate',this.value)">
+            <span class="slider-val" id="missRateVal">5%</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">% recovered by Beam</span>
+            <input type="range" id="recoverRateSlider" min="10" max="80" value="40" oninput="updateSlider('recoverRate',this.value)">
+            <span class="slider-val" id="recoverRateVal">40%</span>
+          </div>
+          <div class="note-box" style="margin-top:12px">
+            <strong>Logic:</strong> Reps x deals/mo x avg deal x miss rate x recovery rate = monthly revenue Beam protects by ensuring no lead falls through the cracks.
+          </div>
         </div>
-        <div class="note-box" style="margin-top:14px">
-          <strong>How we calculate ROI:</strong> Each log saves time on manual CRM entry, field lookup, and follow-up scheduling. We multiply (reps × logs/day × time saved × hourly rate) to get monthly labor value saved.
-        </div>
+
       </div>
     </div>
 
@@ -801,7 +846,7 @@
     <div class="result-card">
       <div class="result-header">ROI Analysis</div>
       <div class="result-body">
-        <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px">Monthly Labor Value Saved</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px" id="roiSavedLabel">Monthly Value Saved</div>
         <div class="roi-big" id="roiSaved">$0</div>
         <div class="roi-meter">
           <div class="roi-bar-bg">
@@ -856,7 +901,12 @@ const state = {
   ai: 'claude',
   crm: 'notion',
   crmEnterprise: false,
-  salary: 8,
+  salary: 9,
+  roiMode: 'labor',
+  dealValue: 50000,
+  deals: 8,
+  missRate: 5,
+  recoverRate: 40,
   logs: 6,
   timeSaved: 8
 };
@@ -966,10 +1016,21 @@ function pickOption(el, group) {
 
 function updateSlider(key, val) {
   state[key] = +val;
-  document.getElementById(key + 'Val').textContent =
-    key === 'salary' ? '$' + val :
-    key === 'timeSaved' ? val + ' min' : val;
+  let display = val;
+  if (key === 'salary') display = '$' + val;
+  else if (key === 'timeSaved') display = val + ' min';
+  else if (key === 'missRate' || key === 'recoverRate') display = val + '%';
+  else if (key === 'dealValue') display = +val >= 1000 ? '$' + (+val/1000).toFixed(0) + 'k' : '$' + val;
+  document.getElementById(key + 'Val').textContent = display;
+  // show/hide ROI panels
+  if (key === 'roiMode' || true) updateRoiPanels();
   recalc();
+}
+
+function updateRoiPanels() {
+  const mode = state.roiMode;
+  document.getElementById('laborInputs').style.display = (mode === 'labor' || mode === 'both') ? 'block' : 'none';
+  document.getElementById('revenueInputs').style.display = (mode === 'revenue' || mode === 'both') ? 'block' : 'none';
 }
 
 function setRegion(r, el) {
@@ -993,6 +1054,7 @@ document.getElementById('crmEnterprise').addEventListener('change', function() {
 // ───────────── CALC ─────────────
 
 function recalc() {
+  updateRoiPanels();
   const totalUsers = state.reps + state.admins;
   const workDays = 22;
   const isLocal = state.region === 'local';
@@ -1027,8 +1089,8 @@ function recalc() {
   );
 
   // --- Beam Service ---
-  const setupFees = { intl: { small: 2500, mid: 5000, large: 12000 }, local: { small: 1200000/fx, mid: 2500000/fx, large: 6000000/fx } };
-  const retainerFees = { intl: { small: 500, mid: 1200, large: 3000 }, local: { small: 250000/fx, mid: 600000/fx, large: 1500000/fx } };
+  const setupFees = { intl: { small: 2500, mid: 5000, large: 12000 }, local: { small: 1250, mid: 2500, large: 6000 } };
+  const retainerFees = { intl: { small: 500, mid: 1200, large: 3000 }, local: { small: 250, mid: 600, large: 1500 } };
   const setupFee = setupFees[state.region][state.size];
   const retainerFee = retainerFees[state.region][state.size];
 
@@ -1042,8 +1104,14 @@ function recalc() {
   const minPerMonth = state.timeSaved * state.logs * workDays;
   const hoursSaved = (minPerMonth / 60);
   const laborSaved = hoursSaved * state.reps * state.salary;
-  const roiRatio = totalMonthly > 0 ? (laborSaved / totalMonthly) : 99;
-  const paybackMonths = setupFee / Math.max(laborSaved - totalMonthly, 1);
+  // Revenue at stake
+  const revenueSaved = state.reps * state.deals * state.dealValue * (state.missRate/100) * (state.recoverRate/100);
+  const totalValueSaved =
+    state.roiMode === 'labor' ? laborSaved :
+    state.roiMode === 'revenue' ? revenueSaved :
+    laborSaved + revenueSaved;
+  const roiRatio = totalMonthly > 0 ? (totalValueSaved / totalMonthly) : 99;
+  const paybackMonths = setupFee / Math.max(totalValueSaved - totalMonthly, 1);
 
   // --- Difficulty ---
   const diffScore = inp.difficulty + crm.integration + (state.voice ? 1 : 0) + (state.ai === 'copilot' ? 2 : 0) + (state.ai === 'teams' ? 2 : 0);
@@ -1087,12 +1155,12 @@ function recalc() {
   ).join('');
 
   // ROI
-  document.getElementById('roiSaved').textContent = '$' + laborSaved.toFixed(0);
+  document.getElementById('roiSaved').textContent = '$' + totalValueSaved.toFixed(0);
   document.getElementById('hoursSaved').textContent = (hoursSaved).toFixed(1) + ' hrs';
   document.getElementById('payback').textContent = paybackMonths.toFixed(1) + ' months';
   document.getElementById('roiRatio').textContent = roiRatio.toFixed(1) + '×';
   document.getElementById('roiRatioLabel').textContent = roiRatio.toFixed(1) + '×';
-  const barPct = Math.min((laborSaved / (laborSaved + totalMonthly)) * 100, 100);
+  const barPct = Math.min((totalValueSaved / (totalValueSaved + totalMonthly)) * 100, 100);
   document.getElementById('roiBar').style.width = barPct + '%';
 
   // Full breakdown
@@ -1128,16 +1196,23 @@ function recalc() {
       <div class="breakdown-row"><span>Setup fee (one-time)</span><span class="bv">${fmt(setupFee)}</span></div>
       <div class="breakdown-row"><span>Monthly retainer</span><span class="bv">${fmt(retainerFee)}/mo</span></div>
       <div class="breakdown-row"><span>Includes</span><span class="bv">Maintenance + iteration</span></div>
-      ${isLocal ? `<div class="note-box" style="margin-top:8px">Local (Mongolia) pricing applied. FX rate: 1 USD ≈ ₮${fx.toLocaleString()}.</div>` : ''}
+      ${isLocal ? `<div class="note-box" style="margin-top:8px">Mongolia pricing applied (50% of international). All amounts in USD.</div>` : ''}
     </div>
     <div class="breakdown-section">
-      <div class="breakdown-section-title">ROI Calculation</div>
-      <div class="breakdown-row"><span>Reps</span><span class="bv">${state.reps}</span></div>
-      <div class="breakdown-row"><span>Logs/rep/day</span><span class="bv">${state.logs}</span></div>
-      <div class="breakdown-row"><span>Minutes saved/log</span><span class="bv">${state.timeSaved} min</span></div>
+      <div class="breakdown-section-title">ROI Calculation · ${state.roiMode === 'labor' ? 'Labor Savings' : state.roiMode === 'revenue' ? 'Revenue at Stake' : 'Combined'}</div>
+      ${state.roiMode !== 'revenue' ? `
       <div class="breakdown-row"><span>Hours saved/rep/mo</span><span class="bv">${hoursSaved.toFixed(1)} hrs</span></div>
       <div class="breakdown-row"><span>Hourly rate</span><span class="bv">$${state.salary}/hr</span></div>
-      <div class="breakdown-row"><span>Monthly labor value saved</span><span class="bv" style="color:var(--accent2)">${fmt(laborSaved)}</span></div>
+      <div class="breakdown-row"><span>Monthly labor saved</span><span class="bv" style="color:var(--accent2)">${fmt(laborSaved)}</span></div>
+      ` : ''}
+      ${state.roiMode !== 'labor' ? `
+      <div class="breakdown-row"><span>Deals/rep/mo</span><span class="bv">${state.deals}</span></div>
+      <div class="breakdown-row"><span>Avg deal value</span><span class="bv">$${state.dealValue.toLocaleString()}</span></div>
+      <div class="breakdown-row"><span>Lost to no follow-up</span><span class="bv">${state.missRate}%</span></div>
+      <div class="breakdown-row"><span>Recovered by Beam</span><span class="bv">${state.recoverRate}%</span></div>
+      <div class="breakdown-row"><span>Revenue protected/mo</span><span class="bv" style="color:var(--accent3)">${fmt(revenueSaved)}</span></div>
+      ` : ''}
+      <div class="breakdown-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:8px"><span><strong>Total value saved/mo</strong></span><span class="bv" style="color:var(--accent2); font-size:14px">${fmt(totalValueSaved)}</span></div>
     </div>
   `;
 }
