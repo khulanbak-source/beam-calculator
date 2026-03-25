@@ -543,15 +543,15 @@
       <div class="card-body">
         <div class="section-label">Company Size</div>
         <div class="pill-group">
-          <div class="pill active" data-group="size" data-val="small" onclick="select(this,'size')">
+          <div class="pill active" data-group="size" data-val="small" onclick="pickOption(this,'size')">
             Small
             <span class="pill-note">1–20 employees</span>
           </div>
-          <div class="pill" data-group="size" data-val="mid" onclick="select(this,'size')">
+          <div class="pill" data-group="size" data-val="mid" onclick="pickOption(this,'size')">
             Mid-Market
             <span class="pill-note">20–200 employees</span>
           </div>
-          <div class="pill" data-group="size" data-val="large" onclick="select(this,'size')">
+          <div class="pill" data-group="size" data-val="large" onclick="pickOption(this,'size')">
             Enterprise
             <span class="pill-note">200+ employees</span>
           </div>
@@ -586,23 +586,23 @@
       <div class="card-body">
         <div class="section-label">Where do reps send updates? (choose one)</div>
         <div class="pill-group">
-          <div class="pill active" data-group="input" data-val="telegram" onclick="select(this,'input')">
+          <div class="pill active" data-group="input" data-val="telegram" onclick="pickOption(this,'input')">
             Telegram
             <span class="pill-note">Free · Easy setup</span>
           </div>
-          <div class="pill" data-group="input" data-val="whatsapp" onclick="select(this,'input')">
+          <div class="pill" data-group="input" data-val="whatsapp" onclick="pickOption(this,'input')">
             WhatsApp
             <span class="pill-note">Meta API required</span>
           </div>
-          <div class="pill" data-group="input" data-val="slack" onclick="select(this,'input')">
+          <div class="pill" data-group="input" data-val="slack" onclick="pickOption(this,'input')">
             Slack
             <span class="pill-note">Free tier / paid plans</span>
           </div>
-          <div class="pill" data-group="input" data-val="teams" onclick="select(this,'input')">
+          <div class="pill" data-group="input" data-val="teams" onclick="pickOption(this,'input')">
             MS Teams
             <span class="pill-note">Requires M365</span>
           </div>
-          <div class="pill" data-group="input" data-val="viber" onclick="select(this,'input')">
+          <div class="pill" data-group="input" data-val="viber" onclick="pickOption(this,'input')">
             Viber
             <span class="pill-note">Limited API</span>
           </div>
@@ -633,15 +633,15 @@
         <div id="voiceOptions" style="display:none; margin-top:16px">
           <div class="section-label">STT Provider</div>
           <div class="pill-group">
-            <div class="pill active" data-group="stt" data-val="chimege" onclick="select(this,'stt')">
+            <div class="pill active" data-group="stt" data-val="chimege" onclick="pickOption(this,'stt')">
               Chimege
               <span class="pill-note">Mongolian-native · ~₮15/call</span>
             </div>
-            <div class="pill" data-group="stt" data-val="whisper" onclick="select(this,'stt')">
+            <div class="pill" data-group="stt" data-val="whisper" onclick="pickOption(this,'stt')">
               Whisper (OpenAI)
               <span class="pill-note">$0.006/min · multilingual</span>
             </div>
-            <div class="pill" data-group="stt" data-val="google" onclick="select(this,'stt')">
+            <div class="pill" data-group="stt" data-val="google" onclick="pickOption(this,'stt')">
               Google STT
               <span class="pill-note">$0.006/min · GCP</span>
             </div>
@@ -666,19 +666,19 @@
       <div class="card-body">
         <div class="section-label">Choose AI provider</div>
         <div class="pill-group">
-          <div class="pill active" data-group="ai" data-val="claude" onclick="select(this,'ai')">
+          <div class="pill active" data-group="ai" data-val="claude" onclick="pickOption(this,'ai')">
             Claude (Anthropic)
             <span class="pill-note">~$3/M tokens in · Best reasoning</span>
           </div>
-          <div class="pill" data-group="ai" data-val="gpt4o" onclick="select(this,'ai')">
+          <div class="pill" data-group="ai" data-val="gpt4o" onclick="pickOption(this,'ai')">
             GPT-4o (OpenAI)
             <span class="pill-note">~$2.50/M tokens in</span>
           </div>
-          <div class="pill" data-group="ai" data-val="copilot" onclick="select(this,'ai')">
+          <div class="pill" data-group="ai" data-val="copilot" onclick="pickOption(this,'ai')">
             Copilot (Microsoft)
             <span class="pill-note">M365 subscription based</span>
           </div>
-          <div class="pill" data-group="ai" data-val="gemini" onclick="select(this,'ai')">
+          <div class="pill" data-group="ai" data-val="gemini" onclick="pickOption(this,'ai')">
             Gemini (Google)
             <span class="pill-note">$1.25/M tokens · GCP</span>
           </div>
@@ -696,19 +696,19 @@
       <div class="card-body">
         <div class="section-label">Target CRM system</div>
         <div class="pill-group">
-          <div class="pill active" data-group="crm" data-val="notion" onclick="select(this,'crm')">
+          <div class="pill active" data-group="crm" data-val="notion" onclick="pickOption(this,'crm')">
             Notion
             <span class="pill-note">~$8–16/seat/mo</span>
           </div>
-          <div class="pill" data-group="crm" data-val="hubspot" onclick="select(this,'crm')">
+          <div class="pill" data-group="crm" data-val="hubspot" onclick="pickOption(this,'crm')">
             HubSpot
             <span class="pill-note">Free–$45/seat/mo</span>
           </div>
-          <div class="pill" data-group="crm" data-val="salesforce" onclick="select(this,'crm')">
+          <div class="pill" data-group="crm" data-val="salesforce" onclick="pickOption(this,'crm')">
             Salesforce
             <span class="pill-note">$25–$300/seat/mo</span>
           </div>
-          <div class="pill" data-group="crm" data-val="airtable" onclick="select(this,'crm')">
+          <div class="pill" data-group="crm" data-val="airtable" onclick="pickOption(this,'crm')">
             Airtable
             <span class="pill-note">~$10–20/seat/mo</span>
           </div>
@@ -957,11 +957,10 @@ const sttData = {
 
 // ───────────── SELECTORS ─────────────
 
-function select(el, group) {
+function pickOption(el, group) {
   document.querySelectorAll(`[data-group="${group}"]`).forEach(p => p.classList.remove('active', 'multi'));
   el.classList.add('active');
   state[group] = el.dataset.val;
-  if (group === 'voice') { }
   recalc();
 }
 
@@ -997,7 +996,7 @@ function recalc() {
   const totalUsers = state.reps + state.admins;
   const workDays = 22;
   const isLocal = state.region === 'local';
-  const fx = isLocal ? 3450; // MNT per USD
+  const fx = 3450; // MNT per USD
 
   // --- INPUT CHANNEL ---
   const inp = inputData[state.input];
