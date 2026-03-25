@@ -865,6 +865,32 @@
       </div>
     </div>
 
+    <!-- STEP 7: Support Model -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-step">07</span>
+        <span class="card-title">Support Model</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">How does the client want ongoing support?</div>
+        <div class="pill-group">
+          <div class="pill active" data-group="supportModel" data-val="retainer" onclick="pickOption(this,'supportModel')">
+            Retainer
+            <span class="pill-note">Fixed monthly · all small changes included</span>
+          </div>
+          <div class="pill" data-group="supportModel" data-val="ticket" onclick="pickOption(this,'supportModel')">
+            Ticket-based
+            <span class="pill-note">₮50k / $15 per change request</span>
+          </div>
+          <div class="pill" data-group="supportModel" data-val="none" onclick="pickOption(this,'supportModel')">
+            Setup only
+            <span class="pill-note">No ongoing support</span>
+          </div>
+        </div>
+        <div id="supportNote" class="note-box" style="margin-top:14px"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- RIGHT: RESULTS -->
@@ -897,7 +923,7 @@
           <span id="setupFee" style="font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px; color:var(--text)">$0</span>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:8px">
-          <span>Beam retainer (optional)</span>
+          <span id="retainerLabel">Monthly retainer</span>
           <span id="retainerFee" style="font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px; color:var(--accent)">$0</span>
         </div>
       </div>
@@ -986,6 +1012,7 @@ const state = {
   crmEnterprise: false,
   salary: 9,
   roiMode: 'labor',
+  supportModel: 'retainer',
   dealValue: 50000,
   deals: 8,
   missRate: 5,
@@ -1073,6 +1100,24 @@ const crmData = {
   }
 };
 
+const supportData = {
+  retainer: {
+    note: '✅ Recommended. Fixed monthly fee covers small changes, prompt tuning, CRM field updates, and priority response. n8n infrastructure absorbed into retainer margin.',
+    pros: ['Predictable cost for client', 'Ongoing relationship', 'Covers bug fixes + small changes', 'n8n hosting included'],
+    cons: ['Monthly commitment required', 'Not ideal if workflow rarely changes']
+  },
+  ticket: {
+    note: '🎫 Per-ticket pricing: ₮50,000 / $15 per scoped change request. Bug fixes always free. New modules quoted separately. No monthly commitment required.',
+    pros: ['No monthly commitment', 'Pay only when changes are needed', 'Fair for stable, established workflows'],
+    cons: ['n8n infrastructure billed separately (~$20–50/mo)', 'Each change request requires a separate approval']
+  },
+  none: {
+    note: '⚙️ Setup only. Full system delivered and documented. Infrastructure costs (~$20–50/mo for n8n) are billed separately. Best suited for teams with internal technical capability.',
+    pros: ['Lowest ongoing cost', 'Full ownership of the system', 'Good for technically capable teams'],
+    cons: ['No ongoing maintenance included', 'Infrastructure costs handled separately', 'Changes and updates quoted per request']
+  }
+};
+
 const sttData = {
   chimege: {
     note: 'Mongolian-native STT. Priced at ₮3,000/hour = ₮50/min. A 60s voice note ≈ ₮50 (~$0.014). Best accuracy for Mongolian-language reps.',
@@ -1138,6 +1183,15 @@ document.getElementById('crmEnterprise').addEventListener('change', function() {
 
 function recalc() {
   updateRoiPanels();
+  // Support model note
+  const sup = supportData[state.supportModel];
+  if (sup) {
+    let supHtml = sup.note + '<div class="pro-con-box" style="margin-top:10px">';
+    sup.pros.forEach(p => supHtml += `<div class="pro">✓ ${p}</div>`);
+    sup.cons.forEach(c => supHtml += `<div class="con">✗ ${c}</div>`);
+    supHtml += '</div>';
+    updateEl('supportNote', supHtml);
+  }
   const totalUsers = state.reps + state.admins;
   const workDays = 22;
   const isLocal = state.region === 'local';
@@ -1223,7 +1277,21 @@ function recalc() {
   document.getElementById('totalMonthly').innerHTML = `<span>$</span>${totalMonthly.toFixed(0)}`;
   document.getElementById('totalSub').textContent = `/month · ${totalUsers} total users`;
   document.getElementById('setupFee').textContent = fmt(setupFee);
-  document.getElementById('retainerFee').textContent = fmt(retainerFee) + '/mo';
+  const retainerDisplay = state.supportModel === 'retainer'
+    ? fmt(retainerFee) + '/mo'
+    : state.supportModel === 'ticket'
+    ? '₮50k / $15 per ticket'
+    : 'Not included';
+  document.getElementById('retainerFee').textContent = retainerDisplay;
+  // Update retainer label
+  const retainerLabel = document.getElementById('retainerLabel');
+  if (retainerLabel) {
+    retainerLabel.textContent = state.supportModel === 'retainer'
+      ? 'Monthly retainer'
+      : state.supportModel === 'ticket'
+      ? 'Support (ticket-based)'
+      : 'Support';
+  }
 
   const costRowsData = [
     { label: 'AI model (API)', val: fmt(aiMonthly), cls: 'blue' },
@@ -1277,8 +1345,13 @@ function recalc() {
     <div class="breakdown-section">
       <div class="breakdown-section-title">Beam Service Fees</div>
       <div class="breakdown-row"><span>Setup fee (one-time)</span><span class="bv">${fmt(setupFee)}</span></div>
-      <div class="breakdown-row"><span>Monthly retainer</span><span class="bv">${fmt(retainerFee)}/mo</span></div>
-      <div class="breakdown-row"><span>Includes</span><span class="bv">Maintenance + iteration</span></div>
+      <div class="breakdown-row"><span>Support model</span><span class="bv">${{retainer:'Retainer',ticket:'Ticket-based',none:'None'}[state.supportModel]}</span></div>
+      ${state.supportModel === 'retainer' ? `<div class="breakdown-row"><span>Monthly retainer</span><span class="bv" style="color:var(--accent)">${fmt(retainerFee)}/mo</span></div>
+      <div class="breakdown-row"><span>Includes</span><span class="bv">Fixes, tuning, n8n hosting</span></div>` : ''}
+      ${state.supportModel === 'ticket' ? `<div class="breakdown-row"><span>Per ticket</span><span class="bv">₮50,000 / $15</span></div>
+      <div class="breakdown-row"><span>n8n hosting</span><span class="bv">~$20–50/mo (billed separately)</span></div>
+      <div class="breakdown-row"><span>Bug fixes</span><span class="bv">Always free</span></div>` : ''}
+      ${state.supportModel === 'none' ? `<div class="breakdown-row"><span>Post-setup support</span><span class="bv" style="color:var(--accent3)">Not included</span></div><div class="breakdown-row"><span>n8n hosting</span><span class="bv" style="color:var(--accent3)">~$20–50/mo (client responsibility)</span></div><div class="breakdown-row"><span>Infrastructure</span><span class="bv">Discuss hosting arrangement at kickoff</span></div>` : ''}
       ${isLocal ? `<div class="note-box" style="margin-top:8px">Mongolia pricing applied (50% of international). All amounts in USD.</div>` : ''}
     </div>
     <div class="breakdown-section">
